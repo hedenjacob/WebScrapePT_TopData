@@ -1,0 +1,7 @@
+Definer databasen (Produkt, PrisHistorik, ProduktSpecifikation)
+Skab en forbindelse til MySQL og opret tabeller om nødvendigt.
+Brug Selenium i en headless Chrome til at skrab (dvs. automatisk indlæse) websiderne.
+Find produktnavne og priser med CSS-selektorer.
+Gem data i databasen – opret nye rækker hvis produkterne ikke findes, og opret pris-historik og specifikationer.
+Luk driveren og databasen, når du er færdig.
+Det er hele idéen i scriptet: “Hent produktinfo og priser fra en liste af URL’er, genkend CPU/RAM/GPU via regex, og gem det hele overskueligt i en database”
