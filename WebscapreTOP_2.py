@@ -122,5 +122,11 @@ def skrab_priser_og_opdater_prishistorik(urls):
         session.close()
         driver.quit()
 
-urls = ["https://topdata.dk/","https://topdata.dk/shop/443-top-professional/", "https://topdata.dk/shop/452-top-prime/","https://topdata.dk/shop/444-top-performance/","https://topdata.dk/shop/447-game-saet/"]
+urls = [
+    "https://topdata.dk/",
+    "https://topdata.dk/shop/443-top-professional/",
+    "https://topdata.dk/shop/452-top-prime/",
+    "https://topdata.dk/shop/444-top-performance/",
+    "https://topdata.dk/shop/447-game-saet/",
+]
 skrab_priser_og_opdater_prishistorik(urls)
