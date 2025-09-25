@@ -42,8 +42,6 @@ engine = create_engine('mysql+mysqlconnector://root:root@localhost:3306/testtop'
 Base.metadata.create_all(engine)
 Session = sessionmaker(bind=engine)
 
-import re
-
 def extract_specifikationer(produkt_navn):
     specifikationer = {}
 
@@ -77,6 +75,7 @@ def skrab_priser_og_opdater_prishistorik(urls):
     service = Service(ChromeDriverManager().install())
     driver = webdriver.Chrome(service=service, options=options)
     
+    session = None
     try:
         session = Session()
         
@@ -115,11 +114,54 @@ def skrab_priser_og_opdater_prishistorik(urls):
 
                 else:
                     print(f"Produkt '{produkt.text}' er allerede i databasen.")
-                    # Håndter priser og specifikationer, hvis de ændres
-                    # ...
+
+                    pris_opdateret = False
+                    if produkt_obj.pris != pris.text:
+                        print(
+                            f"Opdaterer pris for '{produkt.text}' fra {produkt_obj.pris} til {pris.text}."
+                        )
+                        produkt_obj.pris = pris.text
+                        pris_opdateret = True
+
+                    specifikationer = extract_specifikationer(produkt.text)
+                    eksisterende_spec = (
+                        session.query(ProduktSpecifikation)
+                        .filter_by(produkt_id=produkt_obj.id)
+                        .first()
+                    )
+
+                    if specifikationer:
+                        if eksisterende_spec:
+                            spec_opdateret = False
+                            for felt, vaerdi in specifikationer.items():
+                                if getattr(eksisterende_spec, felt) != vaerdi:
+                                    print(
+                                        f"Opdaterer {felt} for '{produkt.text}' til {vaerdi}."
+                                    )
+                                    setattr(eksisterende_spec, felt, vaerdi)
+                                    spec_opdateret = True
+                            if spec_opdateret:
+                                session.commit()
+                        else:
+                            print(
+                                f"Tilføjer manglende specifikationer for '{produkt.text}': {specifikationer}"
+                            )
+                            ny_spec = ProduktSpecifikation(
+                                produkt_id=produkt_obj.id, **specifikationer
+                            )
+                            session.add(ny_spec)
+                            session.commit()
+
+                    if pris_opdateret:
+                        ny_pris_historik = PrisHistorik(
+                            produkt_id=produkt_obj.id, pris=pris.text
+                        )
+                        session.add(ny_pris_historik)
+                        session.commit()
 
     finally:
-        session.close()
+        if session is not None:
+            session.close()
         driver.quit()
 
 urls = [
